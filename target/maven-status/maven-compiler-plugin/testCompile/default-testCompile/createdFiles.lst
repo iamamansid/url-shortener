@@ -1,0 +1,4 @@
+com/iamamansid/urlshortener/util/Base62Test.class
+com/iamamansid/urlshortener/kafka/ClickEventProducerTest.class
+com/iamamansid/urlshortener/service/UrlServiceTest.class
+com/iamamansid/urlshortener/controller/RedirectPatternTest.class

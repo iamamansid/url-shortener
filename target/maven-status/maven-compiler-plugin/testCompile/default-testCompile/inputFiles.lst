@@ -1,0 +1,4 @@
+/home/hatch/workspace/url-shortener/src/test/java/com/iamamansid/urlshortener/controller/RedirectPatternTest.java
+/home/hatch/workspace/url-shortener/src/test/java/com/iamamansid/urlshortener/kafka/ClickEventProducerTest.java
+/home/hatch/workspace/url-shortener/src/test/java/com/iamamansid/urlshortener/service/UrlServiceTest.java
+/home/hatch/workspace/url-shortener/src/test/java/com/iamamansid/urlshortener/util/Base62Test.java

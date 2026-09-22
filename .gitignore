@@ -1,0 +1,21 @@
+target/
+!.mvn/wrapper/maven-wrapper.jar
+!**/src/main/**/target/
+!**/src/test/**/target/
+
+# IDE
+.idea/
+*.iws
+*.iml
+*.ipr
+.vscode/
+*.class
+
+# OS
+.DS_Store
+
+# Env / secrets (never commit real credentials)
+.env
+
+# Docker build cache
+.dockerignore
