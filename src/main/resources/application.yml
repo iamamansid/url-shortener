@@ -5,7 +5,10 @@ spring:
   application:
     name: url-shortener
   datasource:
-    # Full JDBC URL. (For Heroku-style postgres:// URLs, set SPRING_DATASOURCE_URL instead.)
+    # Credential discovery: if DATABASE_URL is in postgres://user:pass@host:port/db
+    # form (Render/Heroku/Railway style), DatabaseUrlEnvironmentPostProcessor converts
+    # it to a JDBC URL and splits out the username/password automatically. A JDBC URL
+    # (or DB_USERNAME/DB_PASSWORD) is used as-is when DATABASE_URL is absent.
     url: ${DATABASE_URL:jdbc:postgresql://localhost:5432/urlshortener}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}

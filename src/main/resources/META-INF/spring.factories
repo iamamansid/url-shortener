@@ -1,0 +1,4 @@
+# Database credential discovery: converts a postgres:// DATABASE_URL into
+# spring.datasource.* properties before the application context starts.
+org.springframework.boot.env.EnvironmentPostProcessor=\
+com.iamamansid.urlshortener.config.DatabaseUrlEnvironmentPostProcessor
