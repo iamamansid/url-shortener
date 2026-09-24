@@ -6,6 +6,8 @@ import com.iamamansid.urlshortener.dto.PageResponse;
 import com.iamamansid.urlshortener.dto.UrlListItem;
 import com.iamamansid.urlshortener.dto.UrlStatsResponse;
 import com.iamamansid.urlshortener.service.UrlService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -23,6 +25,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/api/v1/urls")
+@Tag(name = "Short links", description = "Create short links, browse them, and see how many times each was clicked")
 public class UrlController {
 
     private final UrlService urlService;
@@ -31,11 +34,14 @@ public class UrlController {
         this.urlService = urlService;
     }
 
+    @Operation(summary = "Create a short link",
+            description = "Paste any long URL (optionally pick your own custom code) and get back a short link you can share.")
     @PostMapping
     public ResponseEntity<CreateUrlResponse> createShortUrl(@Valid @RequestBody CreateUrlRequest request) {
         return ResponseEntity.status(HttpStatus.CREATED).body(urlService.createShortUrl(request));
     }
 
+    @Operation(summary = "List all short links", description = "Newest links first.")
     @GetMapping
     public PageResponse<UrlListItem> listUrls(
             @RequestParam(defaultValue = "0") int page,
@@ -46,11 +52,14 @@ public class UrlController {
         return urlService.listUrls(pageable);
     }
 
+    @Operation(summary = "See click stats for a link",
+            description = "Shows the original URL and how many times the short link was opened.")
     @GetMapping("/{code}/stats")
     public UrlStatsResponse getStats(@PathVariable String code) {
         return urlService.getStats(code);
     }
 
+    @Operation(summary = "Delete a short link")
     @DeleteMapping("/{code}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable String code) {

@@ -1,25 +1,21 @@
 package com.iamamansid.urlshortener.controller;
 
 import org.junit.jupiter.api.Test;
-
-import java.util.Map;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
 
 /**
- * Verifies the root landing endpoint returns service metadata instead of an error.
+ * Verifies the root path redirects to the interactive API docs (Swagger UI).
  */
 class RootControllerTest {
 
     @Test
-    void rootReturnsServiceMetadata() {
-        Map<String, String> body = new RootController().root();
+    void rootRedirectsToSwaggerUi() {
+        ResponseEntity<Void> response = new RootController().root();
 
-        assertEquals("url-shortener", body.get("service"));
-        assertEquals("ok", body.get("status"));
-        assertTrue(body.get("create").contains("POST /api/v1/urls"));
-        assertTrue(body.get("redirect").contains("GET /{code}"));
-        assertTrue(body.get("health").contains("/actuator/health"));
+        assertEquals(HttpStatus.FOUND, response.getStatusCode());
+        assertEquals("/swagger-ui/index.html", response.getHeaders().getLocation().toString());
     }
 }
