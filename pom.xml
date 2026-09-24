@@ -43,6 +43,12 @@
             <artifactId>flyway-core</artifactId>
         </dependency>
         <dependency>
+            <!-- Flyway 10+ moved database support out of flyway-core; without
+                 this module every PostgreSQL version is "Unsupported Database". -->
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+        <dependency>
             <groupId>org.postgresql</groupId>
             <artifactId>postgresql</artifactId>
             <scope>runtime</scope>
