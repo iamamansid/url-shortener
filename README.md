@@ -4,6 +4,8 @@ A production-style URL shortening service built with **Java 17, Spring Boot 3, P
 
 **What it does:** `POST /api/v1/urls` turns a long URL into a short code (e.g. `http://localhost:8080/0003d7`). Visiting the short link 302-redirects to the original URL, fires a click event to Kafka, and a consumer aggregates click counts back into Postgres. Redis sits in front of Postgres on the hot redirect path.
 
+**Web UI:** the root path (`/`) now serves **Snip**, a full single-page app — shorten links, pick custom aliases, copy to clipboard, view live click stats, and manage recent links, all from the browser. Interactive API docs remain at `/swagger-ui/index.html`.
+
 ## Architecture
 
 ```mermaid

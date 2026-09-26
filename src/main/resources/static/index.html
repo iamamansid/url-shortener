@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Snip — Short links with real-time analytics</title>
+  <meta name="description" content="Snip is a fast URL shortener with click analytics, built on Spring Boot, Redis, Kafka and PostgreSQL. Shorten any link in seconds." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="#top"><span class="brand-mark">✂️</span> Snip</a>
+      <nav class="nav-links">
+        <a href="#features">Features</a>
+        <a href="#how">How it works</a>
+        <a href="#api">API</a>
+      </nav>
+      <div class="nav-right">
+        <span id="health-pill" class="health-pill health-unknown"><span class="dot"></span><span id="health-text">Checking…</span></span>
+        <a class="btn btn-small" href="#shorten">Shorten a link</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="top">
+    <!-- HERO -->
+    <section class="hero">
+      <div class="hero-inner">
+        <div class="badge">● Live demo &nbsp;·&nbsp; Spring Boot + Redis + Kafka + Postgres</div>
+        <h1>Short links,<br /><span class="gradient">measured in real time.</span></h1>
+        <p class="lede">Paste a long URL, get a short link instantly, and watch every click flow through a Kafka-powered analytics pipeline. Free, no sign-up.</p>
+
+        <div id="shorten" class="shorten-card">
+          <div class="shorten-row">
+            <input id="url-input" type="url" placeholder="https://example.com/a/very/long/link…" autocomplete="off" spellcheck="false" />
+            <button id="shorten-btn" class="btn btn-primary">Shorten</button>
+          </div>
+          <div class="shorten-sub">
+            <button id="alias-toggle" class="link-btn" type="button">+ Custom alias</button>
+            <span class="hint">20 links / minute per IP · abuse-protected</span>
+          </div>
+          <div id="alias-row" class="alias-row hidden">
+            <span class="alias-prefix" id="alias-prefix">snip/</span>
+            <input id="alias-input" type="text" placeholder="my-link" maxlength="32" autocomplete="off" spellcheck="false" />
+          </div>
+          <div id="shorten-status" class="status hidden"></div>
+
+          <div id="result-card" class="result-card hidden">
+            <div class="result-label">Your short link is ready</div>
+            <div class="result-row">
+              <a id="result-link" class="result-link" href="#" target="_blank" rel="noopener"></a>
+              <button id="copy-btn" class="btn btn-copy" type="button">Copy</button>
+            </div>
+            <div class="result-meta">
+              <span id="result-original" class="result-original"></span>
+              <span class="result-actions">
+                <button id="result-stats-btn" class="link-btn" type="button">View stats</button>
+                <span id="result-clicks" class="clicks hidden"></span>
+              </span>
+            </div>
+          </div>
+        </div>
+
+        <div class="hero-stats">
+          <div class="hero-stat"><strong id="stat-links">–</strong><span>links shortened</span></div>
+          <div class="hero-stat"><strong>&lt;50ms</strong><span>cached redirect path</span></div>
+          <div class="hero-stat"><strong>Kafka</strong><span>click event pipeline</span></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- RECENT -->
+    <section id="recent-section" class="section hidden">
+      <div class="wrap">
+        <h2>Your recent links</h2>
+        <p class="section-sub">Stored in this browser. Clicks update live from the analytics pipeline.</p>
+        <div id="recent-list" class="recent-list"></div>
+      </div>
+    </section>
+
+    <!-- FEATURES -->
+    <section id="features" class="section">
+      <div class="wrap">
+        <h2>Built like production, not a toy</h2>
+        <p class="section-sub">Every feature below is a real system-design pattern running live behind this page.</p>
+        <div class="grid">
+          <div class="card"><div class="card-icon">⚡</div><h3>Instant redirects</h3><p>Cache-aside lookups in Redis keep the hot redirect path under 50ms; Postgres is the fallback, never the bottleneck.</p></div>
+          <div class="card"><div class="card-icon">📊</div><h3>Real-time click analytics</h3><p>Each visit fires a click event to Kafka; a consumer batch-aggregates counts back into Postgres. Stats stay fresh without slowing redirects.</p></div>
+          <div class="card"><div class="card-icon">🛡️</div><h3>Abuse protection</h3><p>Token-bucket rate limiting (20 creations/minute per IP) and strict URL validation keep the service clean for everyone.</p></div>
+          <div class="card"><div class="card-icon">✏️</div><h3>Custom aliases</h3><p>Want <code>snip/launch-day</code>? Pick your own memorable code — validated and uniqueness-checked.</p></div>
+          <div class="card"><div class="card-icon">🧩</div><h3>Developer API</h3><p>A documented REST API with Swagger UI. Create, list, inspect and delete links programmatically.</p></div>
+          <div class="card"><div class="card-icon">🗄️</div><h3>Durable by design</h3><p>PostgreSQL with Flyway migrations for the source of truth; Base62-encoded IDs give collision-free codes by construction.</p></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section id="how" class="section section-alt">
+      <div class="wrap">
+        <h2>How it works</h2>
+        <p class="section-sub">Three steps for you. A lot more happening underneath.</p>
+        <div class="steps">
+          <div class="step"><div class="step-n">1</div><h3>Paste</h3><p>Drop in any long URL above — optionally with a custom alias.</p></div>
+          <div class="step"><div class="step-n">2</div><h3>Share</h3><p>Your short link redirects in milliseconds, anywhere you post it.</p></div>
+          <div class="step"><div class="step-n">3</div><h3>Measure</h3><p>Every click is counted through the Kafka pipeline. Check stats anytime.</p></div>
+        </div>
+        <div class="arch">
+          <div class="arch-box">You</div><div class="arch-arrow">→</div>
+          <div class="arch-box">Spring Boot</div><div class="arch-arrow">→</div>
+          <div class="arch-box">Redis<br /><span>hot cache</span></div><div class="arch-arrow">→</div>
+          <div class="arch-box">Postgres<br /><span>source of truth</span></div>
+          <div class="arch-row2"><div class="arch-box small">Kafka: url-clicks → aggregator → click counts</div></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- API -->
+    <section id="api" class="section">
+      <div class="wrap">
+        <h2>Use it from your own apps</h2>
+        <p class="section-sub">One POST and you have a short link. Full interactive docs included.</p>
+        <div class="api-grid">
+          <pre class="code"><code>curl -X POST https://url-shortener-fjdk.onrender.com/api/v1/urls \
+  -H 'Content-Type: application/json' \
+  -d '{"url": "https://example.com/very/long/page"}'
+
+# → 201 Created
+# {"code":"0003d7",
+#  "shortUrl":"https://url-shortener-fjdk.onrender.com/0003d7",
+#  "originalUrl":"https://example.com/very/long/page"}</code></pre>
+          <div class="api-cta">
+            <p>Explore every endpoint — create, list, stats, delete — in the interactive docs.</p>
+            <a class="btn btn-primary" href="/swagger-ui/index.html" target="_blank" rel="noopener">Open Swagger UI</a>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="footer">
+    <div class="wrap footer-inner">
+      <div><span class="brand-mark">✂️</span> <strong>Snip</strong> — short links with real-time analytics.</div>
+      <div class="footer-links">
+        <a href="https://github.com/iamamansid/url-shortener" target="_blank" rel="noopener">GitHub</a>
+        <span>·</span>
+        <span>Built with Java 17 · Spring Boot 3 · Redis · Kafka · PostgreSQL</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="/app.js"></script>
+</body>
+</html>
