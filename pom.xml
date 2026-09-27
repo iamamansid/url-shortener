@@ -67,6 +67,12 @@
             <artifactId>spring-boot-starter-data-redis</artifactId>
         </dependency>
 
+        <!-- Persistent HTTP sessions in Redis: logins survive restarts/redeploys -->
+        <dependency>
+            <groupId>org.springframework.session</groupId>
+            <artifactId>spring-session-data-redis</artifactId>
+        </dependency>
+
         <!-- Messaging -->
         <dependency>
             <groupId>org.springframework.kafka</groupId>

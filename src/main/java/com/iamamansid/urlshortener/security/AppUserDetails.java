@@ -5,14 +5,20 @@ import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
+import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
 
 /**
  * Bridges {@link AppUser} to Spring Security for the email+password login.
  * The username is the email address.
+ *
+ * Implements {@link Serializable} so the security context can be stored in
+ * the Redis-backed HTTP session.
  */
-public class AppUserDetails implements UserDetails {
+public class AppUserDetails implements UserDetails, Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     private final AppUser user;
 

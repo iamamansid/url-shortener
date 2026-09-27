@@ -4,16 +4,16 @@ server:
   # OAuth2 redirect URI is built as https://snip.nakhlavi.me/... (Google
   # rejects anything else).
   forward-headers-strategy: framework
-  servlet:
-    session:
-      cookie:
-        # Set SESSION_COOKIE_SECURE=true on Render (HTTPS-only site).
-        secure: ${SESSION_COOKIE_SECURE:false}
-        same-site: lax
 
 spring:
   application:
     name: url-shortener
+  session:
+    # Redis-backed HTTP sessions: logins survive restarts, redeploys and
+    # free-tier spin-downs. The session cookie itself (name SESSION,
+    # Secure/HttpOnly/SameSite) is configured in SessionConfig.
+    store-type: redis
+    timeout: 24h
   datasource:
     # Credential discovery: if DATABASE_URL is in postgres://user:pass@host:port/db
     # form (Render/Heroku/Railway style), DatabaseUrlEnvironmentPostProcessor converts

@@ -87,7 +87,7 @@ public class SecurityConfig {
                         .logoutSuccessHandler((request, response, authentication) ->
                                 writeJson(response, HttpServletResponse.SC_OK,
                                         java.util.Map.of("signedOut", true)))
-                        .deleteCookies("JSESSIONID"))
+                        .deleteCookies("SESSION"))
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo.userService(oauth2UserService))
                         .successHandler(loginSuccessHandler))

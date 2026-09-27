@@ -10,16 +10,22 @@ import jakarta.persistence.Id;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 
+import java.io.Serializable;
 import java.time.Instant;
 
 /**
  * An application user. Created either via the local email+password form
  * ({@link AuthProvider#LOCAL}) or on first Google SSO sign-in
  * ({@link AuthProvider#GOOGLE}). SSO users have no password hash.
+ *
+ * Implements {@link Serializable} so the signed-in user can be stored in the
+ * Redis-backed HTTP session (Spring Session serializes the security context).
  */
 @Entity
 @Table(name = "app_users")
-public class AppUser {
+public class AppUser implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
