@@ -1,0 +1,49 @@
+# Production overlay for a single VM (e.g. Oracle Cloud Ampere A1).
+# The base docker-compose.yml holds dev defaults; this file locks it down for prod:
+#  - database/redis/kafka ports are NOT published to the host
+#  - Postgres password comes from the environment (never committed)
+#  - Caddy terminates HTTPS for snip.nakhlavi.me with automatic certificates
+#
+# Usage:
+#   cp .env.example .env   # then fill in real secrets
+#   docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --build
+
+services:
+  postgres:
+    ports: []
+    environment:
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+
+  redis:
+    ports: []
+
+  kafka:
+    ports: []
+
+  app:
+    ports: []
+    environment:
+      DB_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
+      GOOGLE_CLIENT_ID: ${GOOGLE_CLIENT_ID:?set GOOGLE_CLIENT_ID in .env}
+      GOOGLE_CLIENT_SECRET: ${GOOGLE_CLIENT_SECRET:?set GOOGLE_CLIENT_SECRET in .env}
+      ADMIN_EMAILS: ${ADMIN_EMAILS:-aman.siddiqui114@gmail.com}
+      SESSION_COOKIE_SECURE: "true"
+      BASE_URL: https://snip.nakhlavi.me
+      LOG_LEVEL: INFO
+
+  caddy:
+    image: caddy:2-alpine
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddydata:/data
+      - caddyconfig:/config
+    depends_on:
+      - app
+    restart: unless-stopped
+
+volumes:
+  caddydata:
+  caddyconfig:

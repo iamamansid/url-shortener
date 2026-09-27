@@ -1,0 +1,5 @@
+# Public entrypoint. Caddy fetches and renews the TLS certificate automatically.
+# Add more site blocks here as new projects move onto this VM.
+snip.nakhlavi.me {
+	reverse_proxy app:8080
+}
