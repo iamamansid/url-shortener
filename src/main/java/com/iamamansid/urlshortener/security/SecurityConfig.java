@@ -97,6 +97,9 @@ public class SecurityConfig {
                                 writeJson(response, HttpServletResponse.SC_UNAUTHORIZED,
                                         java.util.Map.of("error", "unauthenticated"));
                             } else {
+                                // Never cache the login redirect: a cached 302 here would
+                                // permanently bounce OAuth start URLs back to login.
+                                response.setHeader("Cache-Control", "no-store");
                                 response.sendRedirect("/login.html");
                             }
                         })
@@ -105,6 +108,7 @@ public class SecurityConfig {
                                 writeJson(response, HttpServletResponse.SC_FORBIDDEN,
                                         java.util.Map.of("error", "forbidden"));
                             } else {
+                                response.setHeader("Cache-Control", "no-store");
                                 response.sendRedirect("/login.html");
                             }
                         }));

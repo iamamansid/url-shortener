@@ -33,7 +33,13 @@
   fetch("/api/v1/auth/providers").then(function (res) {
     return res.ok ? res.json() : null;
   }).then(function (p) {
-    if (p && p.googleEnabled) ssoBlock.classList.remove("hidden");
+    if (p && p.googleEnabled) {
+      ssoBlock.classList.remove("hidden");
+      /* Cache-buster: guarantees the tap always reaches the server instead of
+         a stale cached redirect from a previous deploy. */
+      var btn = $("google-btn");
+      if (btn) btn.href = "/oauth2/authorization/google?t=" + Date.now();
+    }
   }).catch(function () { /* providers check is best-effort */ });
 
   tabSignin.addEventListener("click", function () {
