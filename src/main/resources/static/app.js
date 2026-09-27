@@ -278,3 +278,23 @@
   loadCounters();
   renderRecent();
 })();
+
+/* ---------- nav auth state (global, after IIFE) ---------- */
+(function () {
+  "use strict";
+  var authLinks = document.getElementById("auth-links");
+  if (!authLinks) return;
+  fetch("/api/v1/auth/me").then(function (res) {
+    if (!res.ok) return null;
+    return res.json();
+  }).then(function (me) {
+    if (!me || !me.email) return;
+    var html = '<a class="btn btn-small btn-ghost" href="/dashboard.html">Dashboard</a>';
+    if (me.role === "ADMIN") html += '<a class="btn btn-small btn-ghost" href="/admin.html">Admin</a>';
+    html += '<button class="btn btn-small btn-ghost" id="nav-signout" type="button">Sign out</button>';
+    authLinks.innerHTML = html;
+    document.getElementById("nav-signout").addEventListener("click", function () {
+      fetch("/api/v1/auth/logout", { method: "POST" }).finally(function () { location.reload(); });
+    });
+  }).catch(function () { /* signed-out state stays */ });
+})();

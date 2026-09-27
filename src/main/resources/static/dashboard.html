@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My links — Snip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/"><span class="brand-mark">✂️</span> Snip</a>
+      <nav class="nav-links">
+        <a href="/dashboard.html" class="active">My links</a>
+        <a id="nav-admin-link" class="hidden" href="/admin.html">Admin</a>
+      </nav>
+      <div class="nav-right">
+        <span id="user-chip" class="user-chip hidden"></span>
+        <button id="signout-btn" class="btn btn-small btn-ghost" type="button">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap dash-main">
+    <h1>My links</h1>
+    <p class="section-sub">Everything you shorten while signed in lives here — with live click counts.</p>
+
+    <div class="shorten-card dash-create">
+      <div class="shorten-row">
+        <input id="url-input" type="url" placeholder="https://example.com/a/very/long/link…" autocomplete="off" spellcheck="false" />
+        <button id="shorten-btn" class="btn btn-primary">Shorten</button>
+      </div>
+      <div class="shorten-sub">
+        <button id="alias-toggle" class="link-btn" type="button">+ Custom alias</button>
+      </div>
+      <div id="alias-row" class="alias-row hidden">
+        <span class="alias-prefix" id="alias-prefix">snip/</span>
+        <input id="alias-input" type="text" placeholder="my-link" maxlength="32" autocomplete="off" spellcheck="false" />
+      </div>
+      <div id="shorten-status" class="status hidden"></div>
+    </div>
+
+    <div id="links-status" class="status hidden"></div>
+    <div class="table-wrap">
+      <table class="data-table" id="links-table">
+        <thead>
+          <tr>
+            <th>Short link</th>
+            <th>Destination</th>
+            <th class="num">Clicks</th>
+            <th>Created</th>
+            <th class="actions-col">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="links-body"></tbody>
+      </table>
+      <div id="empty-state" class="empty-state hidden">No links yet — shorten your first one above.</div>
+    </div>
+    <div class="pager">
+      <button id="prev-btn" class="btn btn-small btn-ghost" type="button">← Newer</button>
+      <span id="page-info" class="page-info"></span>
+      <button id="next-btn" class="btn btn-small btn-ghost" type="button">Older →</button>
+    </div>
+  </main>
+
+  <script src="/dashboard.js"></script>
+</body>
+</html>

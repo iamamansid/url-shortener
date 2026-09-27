@@ -58,6 +58,24 @@ This starts Postgres 16, Redis 7, Kafka (single-broker KRaft, no ZooKeeper), and
 
 Health check: `curl http://localhost:8080/actuator/health`
 
+## Accounts, admin & analytics
+
+- **Sign up** with email + password, or **sign in with Google** (free OAuth client required, see config above). Accounts created by emails in `ADMIN_EMAILS` automatically get the admin role.
+- Signed-in users see their links at `/dashboard.html` — create, watch live click counts, and delete their own links. Anonymous shortening still works; anonymous links are manageable only by admins.
+- Admins get `/admin.html`: totals (users, links, clicks, homepage visits), 30-day charts for visits/links/clicks, top links, newest links, and newest users.
+
+Key endpoints:
+
+| Endpoint | Auth | Description |
+|---|---|---|
+| `POST /api/v1/auth/register` | Public | `{"email","password","displayName?"}` → creates account, then sign in via `/api/v1/auth/login` |
+| `POST /api/v1/auth/login` | Public | Form fields `email` + `password`; session cookie |
+| `POST /api/v1/auth/logout` | Signed-in | Ends the session |
+| `GET /api/v1/auth/me` | Signed-in | `{email, displayName, role, provider}` |
+| `GET /api/v1/auth/providers` | Public | `{googleEnabled}` |
+| `GET /api/v1/me/urls` | Signed-in | Paginated list of the user's own links |
+| `GET /api/v1/admin/stats` | Admin | Site-wide analytics JSON |
+
 ## API examples
 
 **Create a short URL**
@@ -118,6 +136,8 @@ Everything is driven by environment variables (see `src/main/resources/applicati
 | `KAFKA_CLICK_TOPIC` | `url-clicks` | Click-event topic name |
 | `KAFKA_ENABLED` | `true` | Set to `false` to run with **no Kafka broker** — clicks are counted with a direct atomic DB update instead of the event pipeline. Also set `MANAGEMENT_HEALTH_KAFKA_ENABLED=false` in that mode |
 | `BASE_URL` | `http://localhost:8080` | Public base used to build short URLs |
+| `ADMIN_EMAILS` | `aman.siddiqui114@gmail.com` | Comma-separated emails granted the `ADMIN` role on signup/Google sign-in |
+| `GOOGLE_CLIENT_ID` / `GOOGLE_CLIENT_SECRET` | *(unset)* | Google Cloud OAuth client — free. Leave unset to disable the "Sign in with Google" button; email/password login keeps working. Redirect URI: `<BASE_URL>/login/oauth2/code/google` |
 | `RATE_LIMIT_PER_MINUTE` | `20` | URL creations per minute per client IP |
 | `CACHE_TTL_HOURS` | `24` | Redis TTL for code→URL mappings |
 | `CODE_MIN_LENGTH` | `6` | Zero-padding width for generated codes |

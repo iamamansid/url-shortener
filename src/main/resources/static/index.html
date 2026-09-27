@@ -23,6 +23,7 @@
         <a href="#api">API</a>
       </nav>
       <div class="nav-right">
+        <span id="auth-links"><a class="btn btn-small btn-ghost" href="/login.html">Log in</a></span>
         <span id="health-pill" class="health-pill health-unknown"><span class="dot"></span><span id="health-text">Checking…</span></span>
         <a class="btn btn-small" href="#shorten">Shorten a link</a>
       </div>
@@ -127,13 +128,13 @@
         <h2>Use it from your own apps</h2>
         <p class="section-sub">One POST and you have a short link. Full interactive docs included.</p>
         <div class="api-grid">
-          <pre class="code"><code>curl -X POST https://url-shortener-fjdk.onrender.com/api/v1/urls \
+          <pre class="code"><code>curl -X POST https://snip.nakhlavi.me/api/v1/urls \
   -H 'Content-Type: application/json' \
   -d '{"url": "https://example.com/very/long/page"}'
 
 # → 201 Created
 # {"code":"0003d7",
-#  "shortUrl":"https://url-shortener-fjdk.onrender.com/0003d7",
+#  "shortUrl":"https://snip.nakhlavi.me/0003d7",
 #  "originalUrl":"https://example.com/very/long/page"}</code></pre>
           <div class="api-cta">
             <p>Explore every endpoint — create, list, stats, delete — in the interactive docs.</p>

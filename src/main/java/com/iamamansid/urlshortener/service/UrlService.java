@@ -6,6 +6,7 @@ import com.iamamansid.urlshortener.dto.CreateUrlResponse;
 import com.iamamansid.urlshortener.dto.PageResponse;
 import com.iamamansid.urlshortener.dto.UrlListItem;
 import com.iamamansid.urlshortener.dto.UrlStatsResponse;
+import com.iamamansid.urlshortener.entity.AppUser;
 import com.iamamansid.urlshortener.entity.ShortUrl;
 import com.iamamansid.urlshortener.exception.AliasAlreadyExistsException;
 import com.iamamansid.urlshortener.exception.InvalidUrlException;
@@ -18,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -56,9 +58,11 @@ public class UrlService {
      * Creates a short URL. Generated codes come from the Base62-encoded
      * database id (insert first, then set code), so they are unique by
      * construction without a retry loop.
+     *
+     * @param owner the signed-in creator, or {@code null} for anonymous links
      */
     @Transactional
-    public CreateUrlResponse createShortUrl(CreateUrlRequest request) {
+    public CreateUrlResponse createShortUrl(CreateUrlRequest request, AppUser owner) {
         String originalUrl = normalizeAndValidate(request.url());
 
         String code = null;
@@ -72,6 +76,7 @@ public class UrlService {
         ShortUrl entity = new ShortUrl();
         entity.setOriginalUrl(originalUrl);
         entity.setCode(code);
+        entity.setOwner(owner);
         entity = repository.saveAndFlush(entity);
 
         if (code == null) {
@@ -80,8 +85,17 @@ public class UrlService {
         }
 
         cacheMapping(entity.getCode(), originalUrl);
-        log.info("Created short URL: code={} -> {}", entity.getCode(), originalUrl);
+        log.info("Created short URL: code={} -> {} (owner={})",
+                entity.getCode(), originalUrl, owner != null ? owner.getEmail() : "anonymous");
         return new CreateUrlResponse(entity.getCode(), shortUrl(entity.getCode()), originalUrl);
+    }
+
+    /**
+     * Anonymous variant — kept for backwards compatibility.
+     */
+    @Transactional
+    public CreateUrlResponse createShortUrl(CreateUrlRequest request) {
+        return createShortUrl(request, null);
     }
 
     /**
@@ -122,6 +136,19 @@ public class UrlService {
     @Transactional(readOnly = true)
     public PageResponse<UrlListItem> listUrls(Pageable pageable) {
         Page<ShortUrl> page = repository.findAll(pageable);
+        return toPageResponse(page);
+    }
+
+    /**
+     * Links owned by one user, newest first — the user dashboard.
+     */
+    @Transactional(readOnly = true)
+    public PageResponse<UrlListItem> listUrlsForOwner(AppUser owner, Pageable pageable) {
+        Page<ShortUrl> page = repository.findByOwnerOrderByCreatedAtDesc(owner, pageable);
+        return toPageResponse(page);
+    }
+
+    private PageResponse<UrlListItem> toPageResponse(Page<ShortUrl> page) {
         return new PageResponse<>(
                 page.map(e -> new UrlListItem(
                         e.getCode(),
@@ -142,6 +169,25 @@ public class UrlService {
         repository.delete(entity);
         redis.delete(cacheKey(code));
         log.info("Deleted short URL: code={}", code);
+    }
+
+    /**
+     * Ownership-checked delete: admins may delete any link, users only their own.
+     */
+    @Transactional
+    public void deleteByCode(String code, AppUser requester, boolean isAdmin) {
+        ShortUrl entity = repository.findByCode(code)
+                .orElseThrow(() -> new UrlNotFoundException(code));
+        AppUser owner = entity.getOwner();
+        boolean allowed = isAdmin
+                || (requester != null && owner != null && owner.getId().equals(requester.getId()));
+        if (!allowed) {
+            throw new AccessDeniedException("You can only delete links you created. Sign in as the owner or an admin.");
+        }
+        repository.delete(entity);
+        redis.delete(cacheKey(code));
+        log.info("Deleted short URL: code={} by {}", code,
+                requester != null ? requester.getEmail() : "anonymous");
     }
 
     // ------------------------------------------------------------------ helpers

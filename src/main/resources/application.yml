@@ -1,9 +1,30 @@
 server:
   port: ${PORT:8080}
+  # Render terminates TLS at its proxy; honor X-Forwarded-Proto/Host so the
+  # OAuth2 redirect URI is built as https://snip.nakhlavi.me/... (Google
+  # rejects anything else).
+  forward-headers-strategy: framework
+  servlet:
+    session:
+      cookie:
+        # Set SESSION_COOKIE_SECURE=true on Render (HTTPS-only site).
+        secure: ${SESSION_COOKIE_SECURE:false}
+        same-site: lax
 
 spring:
   application:
     name: url-shortener
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            # Free Google OAuth client. Create one in Google Cloud Console and
+            # set GOOGLE_CLIENT_ID / GOOGLE_CLIENT_SECRET. Leave empty to
+            # disable the "Sign in with Google" button (form login keeps working).
+            client-id: ${GOOGLE_CLIENT_ID:}
+            client-secret: ${GOOGLE_CLIENT_SECRET:}
+            scope: openid, profile, email
   datasource:
     # Credential discovery: if DATABASE_URL is in postgres://user:pass@host:port/db
     # form (Render/Heroku/Railway style), DatabaseUrlEnvironmentPostProcessor converts
@@ -52,6 +73,10 @@ app:
   # free-tier deploys where managed Kafka isn't available. When disabled, also
   # set MANAGEMENT_HEALTH_KAFKA_ENABLED=false so the health check doesn't fail.
   kafka-enabled: ${KAFKA_ENABLED:true}
+
+auth:
+  # Comma-separated emails that get ROLE_ADMIN on signup/sign-in.
+  admin-emails: ${ADMIN_EMAILS:aman.siddiqui114@gmail.com}
 
 logging:
   level:

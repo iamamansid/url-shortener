@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Admin — Snip</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="/styles.css" />
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>✂️</text></svg>" />
+</head>
+<body>
+  <div class="bg-glow"></div>
+
+  <header class="nav">
+    <div class="nav-inner">
+      <a class="brand" href="/"><span class="brand-mark">✂️</span> Snip</a>
+      <nav class="nav-links">
+        <a href="/dashboard.html">My links</a>
+        <a href="/admin.html" class="active">Admin</a>
+      </nav>
+      <div class="nav-right">
+        <span id="user-chip" class="user-chip hidden"></span>
+        <button id="signout-btn" class="btn btn-small btn-ghost" type="button">Sign out</button>
+      </div>
+    </div>
+  </header>
+
+  <main class="wrap dash-main">
+    <h1>Admin dashboard</h1>
+    <p class="section-sub">Site-wide usage: visitors, links, clicks and users.</p>
+
+    <div id="admin-status" class="status hidden"></div>
+
+    <div id="admin-content" class="hidden">
+      <div class="stat-cards">
+        <div class="stat-card"><div class="stat-icon">👥</div><div><strong id="st-users">–</strong><span>registered users</span></div></div>
+        <div class="stat-card"><div class="stat-icon">🔗</div><div><strong id="st-links">–</strong><span>links shortened</span></div></div>
+        <div class="stat-card"><div class="stat-icon">👁</div><div><strong id="st-clicks">–</strong><span>total clicks</span></div></div>
+        <div class="stat-card"><div class="stat-icon">🌐</div><div><strong id="st-views">–</strong><span>homepage visits</span></div></div>
+      </div>
+
+      <div class="chart-grid">
+        <div class="chart-card">
+          <h3>Homepage visits <span class="chart-sub">last 30 days</span></h3>
+          <div id="chart-views" class="chart"></div>
+        </div>
+        <div class="chart-card">
+          <h3>Links created <span class="chart-sub">last 30 days</span></h3>
+          <div id="chart-links" class="chart"></div>
+        </div>
+        <div class="chart-card">
+          <h3>Clicks <span class="chart-sub">last 30 days</span></h3>
+          <div id="chart-clicks" class="chart"></div>
+        </div>
+      </div>
+
+      <h2 class="dash-h2">Top links</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Short link</th><th>Destination</th><th>Owner</th><th class="num">Clicks</th><th>Last click</th></tr></thead>
+          <tbody id="top-links-body"></tbody>
+        </table>
+      </div>
+
+      <h2 class="dash-h2">Newest links</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>Short link</th><th>Destination</th><th>Owner</th><th class="num">Clicks</th><th>Created</th></tr></thead>
+          <tbody id="recent-links-body"></tbody>
+        </table>
+      </div>
+
+      <h2 class="dash-h2">Newest users</h2>
+      <div class="table-wrap">
+        <table class="data-table">
+          <thead><tr><th>User</th><th>Sign-up</th><th>Role</th><th class="num">Links</th><th>Joined</th></tr></thead>
+          <tbody id="users-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+
+  <script src="/admin.js"></script>
+</body>
+</html>

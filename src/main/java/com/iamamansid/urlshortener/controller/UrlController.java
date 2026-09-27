@@ -5,7 +5,9 @@ import com.iamamansid.urlshortener.dto.CreateUrlResponse;
 import com.iamamansid.urlshortener.dto.PageResponse;
 import com.iamamansid.urlshortener.dto.UrlListItem;
 import com.iamamansid.urlshortener.dto.UrlStatsResponse;
+import com.iamamansid.urlshortener.entity.AppUser;
 import com.iamamansid.urlshortener.service.UrlService;
+import com.iamamansid.urlshortener.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
@@ -13,6 +15,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -29,16 +33,21 @@ import org.springframework.web.bind.annotation.RestController;
 public class UrlController {
 
     private final UrlService urlService;
+    private final UserService userService;
 
-    public UrlController(UrlService urlService) {
+    public UrlController(UrlService urlService, UserService userService) {
         this.urlService = urlService;
+        this.userService = userService;
     }
 
     @Operation(summary = "Create a short link",
-            description = "Paste any long URL (optionally pick your own custom code) and get back a short link you can share.")
+            description = "Paste any long URL (optionally pick your own custom code) and get back a short link you can share. "
+                    + "Signed-in users own the links they create.")
     @PostMapping
-    public ResponseEntity<CreateUrlResponse> createShortUrl(@Valid @RequestBody CreateUrlRequest request) {
-        return ResponseEntity.status(HttpStatus.CREATED).body(urlService.createShortUrl(request));
+    public ResponseEntity<CreateUrlResponse> createShortUrl(
+            @Valid @RequestBody CreateUrlRequest request, Authentication authentication) {
+        AppUser owner = userService.currentUser(authentication).orElse(null);
+        return ResponseEntity.status(HttpStatus.CREATED).body(urlService.createShortUrl(request, owner));
     }
 
     @Operation(summary = "List all short links", description = "Newest links first.")
@@ -59,10 +68,13 @@ public class UrlController {
         return urlService.getStats(code);
     }
 
-    @Operation(summary = "Delete a short link")
+    @Operation(summary = "Delete a short link",
+            description = "You can delete links you created while signed in; admins can delete any link.")
     @DeleteMapping("/{code}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void delete(@PathVariable String code) {
-        urlService.deleteByCode(code);
+    public void delete(@PathVariable String code, Authentication authentication) {
+        AppUser requester = userService.currentUser(authentication)
+                .orElseThrow(() -> new AccessDeniedException("Sign in to delete links"));
+        urlService.deleteByCode(code, requester, userService.isAdmin(authentication));
     }
 }

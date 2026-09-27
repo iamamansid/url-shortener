@@ -2,6 +2,8 @@ package com.iamamansid.urlshortener.kafka;
 
 import com.iamamansid.urlshortener.config.AppProperties;
 import com.iamamansid.urlshortener.dto.ClickEvent;
+import com.iamamansid.urlshortener.entity.LinkClick;
+import com.iamamansid.urlshortener.repository.LinkClickRepository;
 import com.iamamansid.urlshortener.repository.ShortUrlRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,15 +32,18 @@ public class ClickEventProducer {
 
     private final ObjectProvider<KafkaTemplate<String, ClickEvent>> kafkaTemplate;
     private final ShortUrlRepository repository;
+    private final LinkClickRepository clickRepository;
     private final TransactionTemplate txTemplate;
     private final AppProperties props;
 
     public ClickEventProducer(ObjectProvider<KafkaTemplate<String, ClickEvent>> kafkaTemplate,
                               ShortUrlRepository repository,
+                              LinkClickRepository clickRepository,
                               TransactionTemplate txTemplate,
                               AppProperties props) {
         this.kafkaTemplate = kafkaTemplate;
         this.repository = repository;
+        this.clickRepository = clickRepository;
         this.txTemplate = txTemplate;
         this.props = props;
     }
@@ -74,12 +79,21 @@ public class ClickEventProducer {
      * redirect thread, but it's a single indexed write (typically sub-ms).
      */
     private void countDirectly(String code) {
+        Instant at = Instant.now();
         txTemplate.executeWithoutResult(status -> {
-            int updated = repository.incrementClicks(code, 1L, Instant.now());
+            int updated = repository.incrementClicks(code, 1L, at);
             if (updated == 0) {
                 // Code was deleted after the click — safe to drop.
                 log.warn("Click for unknown code '{}' dropped (kafka disabled)", code);
+                return;
             }
+            // Historical row for the per-day click chart in the admin dashboard.
+            repository.findByCode(code).ifPresent(entity -> {
+                LinkClick row = new LinkClick();
+                row.setShortUrl(entity);
+                row.setClickedAt(at);
+                clickRepository.save(row);
+            });
         });
     }
 }

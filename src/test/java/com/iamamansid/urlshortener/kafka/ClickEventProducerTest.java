@@ -2,6 +2,7 @@ package com.iamamansid.urlshortener.kafka;
 
 import com.iamamansid.urlshortener.config.AppProperties;
 import com.iamamansid.urlshortener.dto.ClickEvent;
+import com.iamamansid.urlshortener.repository.LinkClickRepository;
 import com.iamamansid.urlshortener.repository.ShortUrlRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -37,6 +38,9 @@ class ClickEventProducerTest {
     private ShortUrlRepository repository;
 
     @Mock
+    private LinkClickRepository clickRepository;
+
+    @Mock
     private TransactionTemplate txTemplate;
 
     private static AppProperties props(boolean kafkaEnabled) {
@@ -52,7 +56,7 @@ class ClickEventProducerTest {
         when(template.send(anyString(), anyString(), any(ClickEvent.class)))
                 .thenReturn(CompletableFuture.completedFuture(result));
 
-        new ClickEventProducer(templateProvider, repository, txTemplate, props(true))
+        new ClickEventProducer(templateProvider, repository, clickRepository, txTemplate, props(true))
                 .publishClick("abc123");
 
         ArgumentCaptor<ClickEvent> eventCaptor = ArgumentCaptor.forClass(ClickEvent.class);
@@ -72,7 +76,7 @@ class ClickEventProducerTest {
         }).when(txTemplate).executeWithoutResult(any(Consumer.class));
         when(repository.incrementClicks(anyString(), eq(1L), any(Instant.class))).thenReturn(1);
 
-        new ClickEventProducer(templateProvider, repository, txTemplate, props(false))
+        new ClickEventProducer(templateProvider, repository, clickRepository, txTemplate, props(false))
                 .publishClick("abc123");
 
         verify(repository).incrementClicks(eq("abc123"), eq(1L), any(Instant.class));
