@@ -8,11 +8,10 @@ import com.iamamansid.urlshortener.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
-import org.springframework.util.StringUtils;
+import org.springframework.security.oauth2.client.registration.ClientRegistrationRepository;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -34,12 +33,12 @@ import org.springframework.web.server.ResponseStatusException;
 public class AuthController {
 
     private final UserService userService;
-    private final String googleClientId;
+    private final ClientRegistrationRepository clientRegistrations;
 
     public AuthController(UserService userService,
-                          @Value("${spring.security.oauth2.client.registration.google.client-id:}") String googleClientId) {
+                          ClientRegistrationRepository clientRegistrations) {
         this.userService = userService;
-        this.googleClientId = googleClientId;
+        this.clientRegistrations = clientRegistrations;
     }
 
     @Operation(summary = "Create an account",
@@ -62,7 +61,7 @@ public class AuthController {
             description = "Google SSO is offered only when the OAuth client is configured.")
     @GetMapping("/providers")
     public AuthProvidersResponse providers() {
-        return new AuthProvidersResponse(StringUtils.hasText(googleClientId));
+        return new AuthProvidersResponse(clientRegistrations.findByRegistrationId("google") != null);
     }
 
     private MeResponse toMe(AppUser user) {
