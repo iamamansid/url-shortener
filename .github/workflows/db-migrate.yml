@@ -1,0 +1,38 @@
+name: DB migrate (manual)
+
+# One-off database migration: dumps the Render Postgres database and restores
+# it into Supabase. Triggered manually only — never runs on push/schedule.
+# NOTE: no --clean on restore; the target Supabase project is fresh.
+on:
+  workflow_dispatch:
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dump Render DB and restore into Supabase
+        env:
+          RENDER_DATABASE_URL: ${{ secrets.RENDER_DATABASE_URL }}
+          SUPABASE_DATABASE_URL: ${{ secrets.SUPABASE_DATABASE_URL }}
+        run: |
+          set -e
+          cat > /tmp/mig.sh << 'SCRIPT'
+          set -e
+          echo "== source tables =="
+          psql "$RENDER_DATABASE_URL" -t -A -c "SELECT tablename FROM pg_tables WHERE schemaname='public' ORDER BY 1;"
+          echo "== source row counts =="
+          psql "$RENDER_DATABASE_URL" -t -A -c "SELECT 'SELECT ''' || tablename || ''', count(*) FROM ' || quote_ident(tablename) || ';' FROM pg_tables WHERE schemaname='public'" | psql "$RENDER_DATABASE_URL" -t -A
+          echo "== dumping =="
+          pg_dump "$RENDER_DATABASE_URL" -Fc --no-owner --no-acl -f /tmp/dump.fc
+          ls -la /tmp/dump.fc
+          echo "== restoring =="
+          pg_restore -d "$SUPABASE_DATABASE_URL" --no-owner --no-acl /tmp/dump.fc
+          echo "== target row counts =="
+          psql "$SUPABASE_DATABASE_URL" -t -A -c "SELECT 'SELECT ''' || tablename || ''', count(*) FROM ' || quote_ident(tablename) || ';' FROM pg_tables WHERE schemaname='public'" | psql "$SUPABASE_DATABASE_URL" -t -A
+          echo "MIGRATION DONE"
+          SCRIPT
+          docker run --rm \
+            -e RENDER_DATABASE_URL \
+            -e SUPABASE_DATABASE_URL \
+            -v /tmp/mig.sh:/mig.sh:ro \
+            postgres:18-alpine sh /mig.sh
